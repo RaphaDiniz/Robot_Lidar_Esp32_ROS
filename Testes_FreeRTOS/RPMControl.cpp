@@ -1,7 +1,7 @@
 // RPMControl.cpp
 #include "Arduino.h"
 #include "RPMControl.h"
-
+#define LIMITE_TEMPO_BLOQUEIO 100
 QueueHandle_t xQueueRpmResults = 0;
 
 void taskCalculoRPM(void *parameter) {
@@ -12,8 +12,8 @@ void taskCalculoRPM(void *parameter) {
     float rpmResults[2];
 
     for (;;) {
-        if(xQueueReceive(xQueueEncoderAData, &contadorA, portMAX_DELAY) &&
-        xQueueReceive(xQueueEncoderBData, &contadorB, portMAX_DELAY)){
+        if(xQueueReceive(xQueueEncoderAData, &contadorA, LIMITE_TEMPO_BLOQUEIO) &&
+        xQueueReceive(xQueueEncoderBData, &contadorB, LIMITE_TEMPO_BLOQUEIO)){
 
             rpmA = calcularRPM(contadorA, contadorAnteriorA, tempoUltimaLeituraA);
             rpmB = calcularRPM(contadorB, contadorAnteriorB, tempoUltimaLeituraB);
@@ -21,7 +21,7 @@ void taskCalculoRPM(void *parameter) {
 
             Serial.println(rpmResults[0]);
 
-            xQueueSend(xQueueRpmResults, &rpmResults, portMAX_DELAY);
+            xQueueSend(xQueueRpmResults, &rpmResults, LIMITE_TEMPO_BLOQUEIO);
         }
         vTaskDelay(pdMS_TO_TICKS(80));
     }

@@ -1,6 +1,6 @@
 // BNO055Control.cpp
 #include "bno055.h"
-
+#define LIMITE_TEMPO_BLOQUEIO 100
 String msg = "";
 Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x28, &Wire);
 
@@ -37,7 +37,7 @@ void taskIMUCode(void * parameter) {// finalizada
     Serial.print(accel);
     Serial.print(" Mag=");
     Serial.println(mag);
-    //xSemaphoreTake(xSemaphore,portMAX_DELAY);
+    //xSemaphoreTake(xSemaphore,LIMITE_TEMPO_BLOQUEIO);
     //vTaskDelay(pdMS_TO_TICKS(BNO055_SAMPLERATE_DELAY_MS));*/
     vTaskDelay(pdMS_TO_TICKS(100));
   }

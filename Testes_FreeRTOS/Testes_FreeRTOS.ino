@@ -21,7 +21,7 @@ const int canalMotorB1 = 2;
 const int canalMotorB2 = 3;
 
 const int resolucao = 8;
-const int frequencia = 5000;
+const int frequencia = 50000;
 
 
 const long tempoDebounce = 50; // tempo de debounce em ms
@@ -61,8 +61,8 @@ void setup() {
   // Configuração dos encoders
   pinMode(ENCODER_A, INPUT_PULLUP);
   pinMode(ENCODER_B, INPUT_PULLUP);
-  attachInterrupt(digitalPinToInterrupt(ENCODER_A), interrupcaoEncoderA, CHANGE);
-  attachInterrupt(digitalPinToInterrupt(ENCODER_B), interrupcaoEncoderB, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(ENCODER_A), interrupcaoEncoderA, FALLING);
+  attachInterrupt(digitalPinToInterrupt(ENCODER_B), interrupcaoEncoderB, FALLING);
 
   // Inicia a comunicação Serial
   Serial.begin(115200);
@@ -78,13 +78,13 @@ void setup() {
 
   // Criação das tasks de leitura dos enconders em nucleos separados
 
-  xTaskCreate(taskEncoderA, "lerEnconderA", 10000, NULL, 9, NULL);
-  xTaskCreate(taskEncoderB, "lerEnconderB", 10000, NULL, 9, NULL);
-  xTaskCreate(taskControleMotores, "Tarefa dos motores", 10000, NULL, 8, NULL);
-  xTaskCreate(taskIMUCode, "Tarefa do IMU", 10000, NULL, 5, &taskHandleIMU);
-  xTaskCreate(taskPID, "Tarefa PID", 10000, NULL, 7, NULL);
-  xTaskCreate(taskCalculoRPM, "Tarefa RPM", 10000, NULL, 8, NULL);
-  xTaskCreate(taskLeituraSerial, "Tarefa Serial", 10000, NULL, 3, NULL);
+  xTaskCreatePinnedToCore(taskEncoderA, "lerEnconderA", 10000, NULL, 9, NULL, 1);
+  xTaskCreatePinnedToCore(taskEncoderB, "lerEnconderB", 10000, NULL, 9, NULL, 1);
+  xTaskCreatePinnedToCore(taskControleMotores, "Tarefa dos motores", 10000, NULL, 8, NULL, 0);
+  xTaskCreatePinnedToCore(taskIMUCode, "Tarefa do IMU", 10000, NULL, 5, &taskHandleIMU, 1);
+  xTaskCreatePinnedToCore(taskPID, "Tarefa PID", 10000, NULL, 7, NULL, 0);
+  xTaskCreatePinnedToCore(taskCalculoRPM, "Tarefa RPM", 10000, NULL, 8, NULL, 0);
+  xTaskCreatePinnedToCore(taskLeituraSerial, "Tarefa Serial", 10000, NULL, 3, NULL, 1);
 }
 void loop() {
   // Em FreeRTOS, o loop pode ser deixado vazio.

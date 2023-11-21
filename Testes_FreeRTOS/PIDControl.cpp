@@ -1,4 +1,5 @@
 // PIDControl.cpp
+#define LIMITE_TEMPO_BLOQUEIO 100
 #include "PIDControl.h"
 #include "Arduino.h"
 
@@ -20,7 +21,8 @@ void taskPID(void *parameter) {
     float outputA, outputB;
 
     for (;;) {
-        if (xQueueReceive(xQueueRpmResults, &rpmResults, portMAX_DELAY)) {
+        if (xQueueReceive(xQueueRpmResults, &rpmResults, LIMITE_TEMPO_BLOQUEIO)) {
+            Serial.println("Entrou no PID");
             float erroA = setpointA - rpmResults[0];
             float erroB = setpointB - rpmResults[1];
             Serial.print("PWMValue recebido:");
@@ -31,10 +33,9 @@ void taskPID(void *parameter) {
             Serial.println(outputA);
 
             // Suponha que xQueuePWMValues seja a fila para enviar valores de PWM
-            xQueueSend(xQueuePWMValues, &outputA, portMAX_DELAY);
-            xQueueSend(xQueuePWMValues, &outputB, portMAX_DELAY);
+            xQueueSend(xQueuePWMValues, &outputA, LIMITE_TEMPO_BLOQUEIO);
+            xQueueSend(xQueuePWMValues, &outputB, LIMITE_TEMPO_BLOQUEIO);
         }
-
         vTaskDelay(pdMS_TO_TICKS(50));
     }
 }

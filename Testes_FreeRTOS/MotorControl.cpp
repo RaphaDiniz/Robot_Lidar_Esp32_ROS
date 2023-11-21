@@ -3,20 +3,70 @@
 #include "PinDefinitions.h"
 
 void taskControleMotores(void *parameter) {
-    float outputA;
-    float outputB;
+    char comando;
     for (;;) {
-        if (xQueueReceive(xQueuePWMValues, &outputA, portMAX_DELAY) && 
-        xQueueReceive(xQueuePWMValues, &outputB, portMAX_DELAY)) {
-            Serial.println("PWMCHegado:");
-            Serial.println(outputA);
-            ledcWrite(canalMotorB1, outputA);
-            ledcWrite(canalMotorB2, 0); 
-            ledcWrite(canalMotorA1, outputB);
-            ledcWrite(canalMotorA2, 0); 
-            Serial.print("Motores ativos com PWM: ");
-            Serial.println(outputB);
+        if (xQueueReceive(xQueueComandos, &comando, portMAX_DELAY)){
+
+              switch (comando) {
+                case 'W':
+                  pararMotores();
+                  andarParaFrente();
+                  break;
+                case 'S':
+                  pararMotores();
+                  andarParaTras();
+                  break;
+                case 'A':
+                  pararMotores();
+                  virarEsquerda();
+                  break;
+                case 'D':
+                  pararMotores();
+                  virarDireita();
+                  break;
+                default:
+                  pararMotores();
+                  break;
+              }
         }
         vTaskDelay(pdMS_TO_TICKS(20));
     }
+}
+
+void andarParaFrente() {
+
+    ledcWrite(canalMotorA1, 120);
+    ledcWrite(canalMotorA2, 0);
+    ledcWrite(canalMotorB1, 120);
+    ledcWrite(canalMotorB2, 0);
+}
+
+void andarParaTras() {
+
+    ledcWrite(canalMotorA1, 0);
+    ledcWrite(canalMotorA2, 120);
+    ledcWrite(canalMotorB1, 0);
+    ledcWrite(canalMotorB2, 120);
+}
+
+void virarEsquerda() {
+
+    ledcWrite(canalMotorA1, 0);
+    ledcWrite(canalMotorA2, 120);
+    ledcWrite(canalMotorB1, 120);
+    ledcWrite(canalMotorB2, 0);
+}
+
+void virarDireita() {
+    ledcWrite(canalMotorA1, 120);
+    ledcWrite(canalMotorA2, 0);
+    ledcWrite(canalMotorB1, 0);
+    ledcWrite(canalMotorB2, 120);
+}
+
+void pararMotores() {
+  ledcWrite(canalMotorA1, 0);
+  ledcWrite(canalMotorA2, 0);
+  ledcWrite(canalMotorB1, 0);
+  ledcWrite(canalMotorB2, 0);
 }
